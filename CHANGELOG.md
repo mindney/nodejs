@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/mindney/nodejs/compare/v1.0.2...v1.0.3) (2024-10-10)
+
+
+### Bug Fixes
+
+* Adding socket.io client for use of the library ([7120fd2](https://github.com/mindney/nodejs/commit/7120fd2a7667b2b38377e6680e383b4017b4d62a))
+
 ## [1.0.2](https://github.com/mindney/nodejs/compare/v1.0.1...v1.0.2) (2024-10-10)
 
 
