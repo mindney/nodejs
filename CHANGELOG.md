@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/mindney/nodejs/compare/v1.0.6...v1.1.0) (2024-10-10)
+
+
+### Features
+
+* Adding new AIMessage content response ([720bb8c](https://github.com/mindney/nodejs/commit/720bb8cc6facc14fd7602a0e33c44811b393bd1d))
+
 ## [1.0.6](https://github.com/mindney/nodejs/compare/v1.0.5...v1.0.6) (2024-10-10)
 
 
