@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/mindney/nodejs/compare/v1.0.3...v1.0.4) (2024-10-10)
+
+
+### Bug Fixes
+
+* Adding optional endpoint parameters to connects on developments envs ([25de452](https://github.com/mindney/nodejs/commit/25de4520d2404bae6f77a9914c89d8006bef19fb))
+
 ## [1.0.3](https://github.com/mindney/nodejs/compare/v1.0.2...v1.0.3) (2024-10-10)
 
 
