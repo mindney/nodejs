@@ -10,7 +10,6 @@ export interface MindneyConfig {
   readonly clientId: string;
   readonly apiKey: string;
   readonly secretToken: string;
-  readonly endpoint?: string;
   readonly debug?: boolean;
 }
 
@@ -56,11 +55,6 @@ export interface AIErrorException {
 }
 
 /**
- * Type representing possible commands.
- */
-export type Commands = "request" | "playground";
-
-/**
  * Class representing the MindneySDK.
  */
 export class MindneySDK {
@@ -79,7 +73,7 @@ export class MindneySDK {
    */
   constructor(config: MindneyConfig) {
     this.debug = config.debug ?? false;
-    this.endpoint = config.endpoint ?? "https://ai.mindney.com";
+    this.endpoint = "https://ai.mindney.com";
     this.clientId = config.clientId;
     this.apiKey = config.apiKey;
     this.secretToken = config.secretToken;
@@ -155,26 +149,23 @@ export class MindneySDK {
   }
 
   /**
-   * Sends a command and prompt to the Socket.IO server and returns the response.
+   * Sends a request to the Socket.IO server with the given user prompt and returns the response.
    *
    * @template T - The type of the response message.
-   * @param {Commands} cmd - The command to be sent.
-   * @param {HumanMessage<K>} prompt - The user prompt to be sent.
+   * @param {HumanMessage<K>} payload - The user prompt to be sent to the Socket.IO server.
    * @returns {Promise<AIMessage<T> | AIErrorException>} - A promise that resolves with the response message or an error.
-   * @private
    */
-  private async execute<T, K>(
-    cmd: Commands,
-    message: HumanMessage<K>,
+  public async request<T, K = unknown>(
+    payload: HumanMessage<K>,
   ): Promise<AIMessage<T> | AIErrorException> {
     return new Promise((resolve, reject) => {
       this.log(
         "info",
-        `Executing prompt: "${message.prompt}" | Context: ${JSON.stringify(message.body)}`,
+        `Executing prompt: "${payload.prompt}" | Context: ${JSON.stringify(payload.body)}`,
       );
       this.socket.emit(
-        cmd,
-        message,
+        "request",
+        payload,
         (response: AIMessage<T> | AIErrorException) => {
           if ("code" in response) {
             reject(response);
@@ -190,34 +181,5 @@ export class MindneySDK {
         reject(error);
       });
     });
-  }
-
-  /**
-   * Sends a request to the Socket.IO server with the given user prompt and returns the response.
-   *
-   * @template T - The type of the response message.
-   * @param {HumanMessage<K>} payload - The user prompt to be sent to the Socket.IO server.
-   * @returns {Promise<AIMessage<T> | AIErrorException>} - A promise that resolves with the response message or an error.
-   */
-  public async request<T, K = unknown>(
-    payload: HumanMessage<K>,
-  ): Promise<AIMessage<T> | AIErrorException> {
-    return this.execute<T, K>("request", payload);
-  }
-
-  /**
-   * Sends a test request to the Socket.IO server using the specified user prompt and retrieves the response.
-   *
-   * This method is typically used for testing and development purposes, where the command 'playground' is utilized
-   * to interact with the server in a non-production environment.
-   *
-   * @template T - The expected type of the response message.
-   * @param {HumanMessage<K>} payload - The user prompt to be sent to the Socket.IO server.
-   * @returns {Promise<AIMessage<T> | AIErrorException>} - A promise that resolves with either the response message or an error.
-   */
-  public async test<T, K = unknown>(
-    payload: HumanMessage<K>,
-  ): Promise<AIMessage<T> | AIErrorException> {
-    return this.execute<T, K>("playground", payload);
   }
 }
