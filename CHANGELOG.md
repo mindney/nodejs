@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/mindney/nodejs/compare/v1.0.5...v1.0.6) (2024-10-10)
+
+
+### Bug Fixes
+
+* adding test function ([0dbc86a](https://github.com/mindney/nodejs/commit/0dbc86a7dc5a94bd55b99e71f3f16a5e6d7107b2))
+
 ## [1.0.5](https://github.com/mindney/nodejs/compare/v1.0.4...v1.0.5) (2024-10-10)
 
 
