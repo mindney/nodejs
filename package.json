@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc && cp package.json dist/",
+    "build": "tsc",
     "lint": "eslint 'src/**/*.{js,ts}' --quiet --fix"
   },
   "keywords": [],
