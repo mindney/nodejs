@@ -2,9 +2,7 @@ import { io, Socket } from "socket.io-client";
 import { logger } from "./logger";
 
 /**
- * Represents the configuration settings necessary to initialize and authenticate with the MindneySDK.
- *
- * Configuration object for MindneySDK.
+ * Configuration settings for initializing and authenticating with the MindneySDK.
  */
 export interface MindneyConfig {
   readonly clientId: string;
@@ -14,31 +12,17 @@ export interface MindneyConfig {
 }
 
 /**
- * Represents a message from an AI system.
- *
- * This interface defines the structure of a message that is used to communicate between
- * the AI system and clients. It encapsulates an operation type and associated data.
- *
- * @template T - The type of the data contained in the message. This allows the message
- * to be strongly typed and ensures that the data adheres to a specific structure.
+ * Defines a message structure for communication between an AI system and clients.
+ * @template T - The type of the data contained in the message.
  */
 export interface AIMessage<T> {
-  /**
-   * The type of operation that the AI is performing or has performed. This is a string
-   * identifier that can be used to determine the appropriate response or handling procedure.
-   */
-  readonly operation: string;
-
-  /**
-   * The data associated with the operation. This is generic, allowing for flexibility in
-   * the type of data that can be transmitted, depending on the operation.
-   */
-  readonly data: T;
+  readonly action: string; // Identifies the operation performed by the AI.
+  readonly message: string; // Descriptive message about the operation.
+  readonly data: T; // Data related to the operation, allowing for flexible data types.
 }
 
 /**
- * Interface representing a human message.
- *
+ * Represents a message from a human user.
  * @template T - The type of the data contained in the message.
  */
 export interface HumanMessage<T> {
@@ -47,7 +31,7 @@ export interface HumanMessage<T> {
 }
 
 /**
- * Interface representing an AI error exception.
+ * Represents an error from the AI system.
  */
 export interface AIErrorException {
   readonly code: number;
@@ -55,11 +39,10 @@ export interface AIErrorException {
 }
 
 /**
- * Class representing the MindneySDK.
+ * Manages interactions with the MindneySDK.
  */
 export class MindneySDK {
   private readonly socket: Socket;
-
   private readonly debug: boolean = false;
   private readonly endpoint: string;
   private readonly clientId: string;
@@ -67,9 +50,8 @@ export class MindneySDK {
   private readonly secretToken: string;
 
   /**
-   * Creates an instance of MindneySDK.
-   *
-   * @param {MindneyConfig} config - The configuration object containing clientId, apiKey, and secretToken.
+   * Initializes a new instance of the MindneySDK with specified configuration.
+   * @param {MindneyConfig} config - Configuration including clientId, apiKey, and secretToken.
    */
   constructor(config: MindneyConfig) {
     this.debug = config.debug ?? false;
@@ -94,9 +76,8 @@ export class MindneySDK {
   }
 
   /**
-   * Validates the credentials provided in the configuration.
-   *
-   * @throws {Error} Throws an error if the clientId, apiKey, or secretToken is missing.
+   * Ensures all required credentials are present.
+   * @throws {Error} If any credentials are missing.
    */
   private validateCredentials(): void {
     if (!this.clientId || !this.apiKey || !this.secretToken) {
@@ -105,13 +86,9 @@ export class MindneySDK {
   }
 
   /**
-   * Logs a message with a specified log type if debugging is enabled.
-   *
-   * This method checks if debugging is enabled (`this.debug`). If not, it returns immediately without logging.
-   * If debugging is enabled, it logs the message using the appropriate log level based on the `type` parameter.
-   *
+   * Logs messages based on the debug setting and log type.
    * @param {string} text - The message text to log.
-   * @param {"error" | "info" | "warning"} type - The type of log message. Defaults to "info".
+   * @param {"error" | "info" | "warning"} type - The type of log message.
    */
   private log(type: "error" | "info" | "warning", text: string): void {
     if (!this.debug) return;
@@ -126,9 +103,7 @@ export class MindneySDK {
   }
 
   /**
-   * Initializes the Socket.IO connection and sets up event handlers for various Socket.IO events.
-   *
-   * @private
+   * Sets up the Socket.IO connection and event handlers.
    */
   private initializeSocket(): void {
     this.socket.on("connect", () => {
@@ -136,10 +111,7 @@ export class MindneySDK {
     });
 
     this.socket.on("connect_error", (error) => {
-      this.log(
-        "error",
-        "An error occurred while establishing a connection with Sidney.",
-      );
+      this.log("error", "Connection error with Sidney.");
       this.log("error", JSON.stringify(error));
     });
 
@@ -149,11 +121,10 @@ export class MindneySDK {
   }
 
   /**
-   * Sends a request to the Socket.IO server with the given user prompt and returns the response.
-   *
+   * Sends a user prompt to the server and handles the response.
    * @template T - The type of the response message.
-   * @param {HumanMessage<K>} payload - The user prompt to be sent to the Socket.IO server.
-   * @returns {Promise<AIMessage<T> | AIErrorException>} - A promise that resolves with the response message or an error.
+   * @param {HumanMessage<K>} payload - The user prompt.
+   * @returns {Promise<AIMessage<T> | AIErrorException>} The server response.
    */
   public async request<T, K = unknown>(
     payload: HumanMessage<K>,
@@ -176,7 +147,7 @@ export class MindneySDK {
       );
 
       this.socket.on("error", (error) => {
-        this.log("error", "An error occurred while performing an prompt");
+        this.log("error", "An error occurred during the prompt execution.");
         this.log("error", JSON.stringify(error));
         reject(error);
       });
