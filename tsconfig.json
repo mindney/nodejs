@@ -3,20 +3,29 @@
     // Basic Options
     "target": "es2016", // Specify ECMAScript target version
     "module": "commonjs", // Specify module code generation
+    "declaration": true, // Generate .d.ts files for every .ts file
+    "declarationMap": true, // Generate sourcemaps for .d.ts files
+    "sourceMap": true, // Generate .js.map files for debugging
+    "outDir": "./dist", // Redirect output structure to the directory
 
     // Module Resolution Options
     "typeRoots": ["./node_modules/@types", "./types"], // List of folders to include type definitions from
+    "esModuleInterop": true, // Enable compatibility with ES6 module system
 
     // Emit Options
-    "outDir": "./dist", // Redirect output structure to the directory
+    "removeComments": true, // Do not emit comments to output
 
     // Type Checking Options
     "skipLibCheck": true, // Skip type checking of declaration files
 
-    // Additional Checks
-    "removeComments": true // Do not emit comments to output
+    // Additional Options
+    "forceConsistentCasingInFileNames": true // Disallow inconsistently-cased references to the same file.
   },
   "include": [
     "src/**/*.ts" // Files to be included in compilation
+  ],
+  "exclude": [
+    "node_modules", // Exclude node_modules to prevent double compilation
+    "**/*.test.ts" // Exclude test files from compilation
   ]
 }
