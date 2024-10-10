@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client";
+import { logger } from "./logger";
 
 /**
  * Represents the configuration settings necessary to initialize and authenticate with the MindneySDK.
@@ -10,6 +11,7 @@ export interface MindneyConfig {
   readonly apiKey: string;
   readonly secretToken: string;
   readonly endpoint?: string;
+  readonly debug?: boolean;
 }
 
 /**
@@ -64,6 +66,7 @@ export type Commands = "request";
 export class MindneySDK {
   private readonly socket: Socket;
 
+  private readonly debug: boolean = false;
   private readonly endpoint: string;
   private readonly clientId: string;
   private readonly apiKey: string;
@@ -75,6 +78,7 @@ export class MindneySDK {
    * @param {MindneyConfig} config - The configuration object containing clientId, apiKey, and secretToken.
    */
   constructor(config: MindneyConfig) {
+    this.debug = config.debug ?? false;
     this.endpoint = config.endpoint ?? "https://ai.mindney.com";
     this.clientId = config.clientId;
     this.apiKey = config.apiKey;
@@ -82,10 +86,14 @@ export class MindneySDK {
 
     this.validateCredentials();
     this.socket = io(this.endpoint, {
-      auth: {
-        clientId: this.clientId,
-        apiKey: this.apiKey,
-        secretToken: this.secretToken,
+      transportOptions: {
+        polling: {
+          extraHeaders: {
+            "client-id": this.clientId,
+            "api-key": this.apiKey,
+            "secret-token": this.secretToken,
+          },
+        },
       },
     });
     this.initializeSocket();
@@ -103,21 +111,46 @@ export class MindneySDK {
   }
 
   /**
+   * Logs a message with a specified log type if debugging is enabled.
+   *
+   * This method checks if debugging is enabled (`this.debug`). If not, it returns immediately without logging.
+   * If debugging is enabled, it logs the message using the appropriate log level based on the `type` parameter.
+   *
+   * @param {string} text - The message text to log.
+   * @param {"error" | "info" | "warning"} type - The type of log message. Defaults to "info".
+   */
+  private log(type: "error" | "info" | "warning", text: string): void {
+    if (!this.debug) return;
+
+    const logActions = {
+      error: () => logger.error(text),
+      info: () => logger.info(text),
+      warning: () => logger.warn(text),
+    };
+
+    logActions[type]();
+  }
+
+  /**
    * Initializes the Socket.IO connection and sets up event handlers for various Socket.IO events.
    *
    * @private
    */
   private initializeSocket(): void {
     this.socket.on("connect", () => {
-      console.log("Connection established");
+      this.log("info", "Successfully connected to Sidney.");
     });
 
     this.socket.on("connect_error", (error) => {
-      console.error("Socket.IO connection error:", error);
+      this.log(
+        "error",
+        "An error occurred while establishing a connection with Sidney.",
+      );
+      this.log("error", JSON.stringify(error));
     });
 
     this.socket.on("disconnect", (reason) => {
-      console.log("Connection closed:", reason);
+      this.log("info", `Disconnected from Sidney, reason: ${reason}`);
     });
   }
 
@@ -135,6 +168,10 @@ export class MindneySDK {
     message: HumanMessage<K>,
   ): Promise<AIMessage<T> | AIErrorException> {
     return new Promise((resolve, reject) => {
+      this.log(
+        "info",
+        `Executing prompt: "${message.prompt}" | Context: ${JSON.stringify(message.context)}`,
+      );
       this.socket.emit(
         cmd,
         message,
@@ -148,6 +185,8 @@ export class MindneySDK {
       );
 
       this.socket.on("error", (error) => {
+        this.log("error", "An error occurred while performing an prompt");
+        this.log("error", JSON.stringify(error));
         reject(error);
       });
     });
