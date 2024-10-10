@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/mindney/nodejs/compare/v1.0.4...v1.0.5) (2024-10-10)
+
+
+### Bug Fixes
+
+* adding debug mode, logs and fixing authentication problem ([6c2c7e6](https://github.com/mindney/nodejs/commit/6c2c7e633d68f60710de890d4003ff1113baa763))
+
 ## [1.0.4](https://github.com/mindney/nodejs/compare/v1.0.3...v1.0.4) (2024-10-10)
 
 
