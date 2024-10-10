@@ -1,21 +1,37 @@
 import { io, Socket } from "socket.io-client";
 
 /**
+ * Represents the configuration settings necessary to initialize and authenticate with the MindneySDK.
+ *
  * Configuration object for MindneySDK.
  */
 export interface MindneyConfig {
   readonly clientId: string;
   readonly apiKey: string;
   readonly secretToken: string;
+  readonly endpoint?: string;
 }
 
 /**
- * Interface representing an AI message.
+ * Represents a message from an AI system.
  *
- * @template T - The type of the data contained in the message.
+ * This interface defines the structure of a message that is used to communicate between
+ * the AI system and clients. It encapsulates an operation type and associated data.
+ *
+ * @template T - The type of the data contained in the message. This allows the message
+ * to be strongly typed and ensures that the data adheres to a specific structure.
  */
 export interface AIMessage<T> {
+  /**
+   * The type of operation that the AI is performing or has performed. This is a string
+   * identifier that can be used to determine the appropriate response or handling procedure.
+   */
   readonly operation: string;
+
+  /**
+   * The data associated with the operation. This is generic, allowing for flexibility in
+   * the type of data that can be transmitted, depending on the operation.
+   */
   readonly data: T;
 }
 
@@ -26,7 +42,7 @@ export interface AIMessage<T> {
  */
 export interface HumanMessage<T> {
   readonly prompt: string;
-  readonly data: T;
+  readonly context: T;
 }
 
 /**
@@ -46,8 +62,9 @@ export type Commands = "request";
  * Class representing the MindneySDK.
  */
 export class MindneySDK {
-  private readonly endpoint: string = "https://ai.mindney.com";
-  private socket: Socket;
+  private readonly socket: Socket;
+
+  private readonly endpoint: string;
   private readonly clientId: string;
   private readonly apiKey: string;
   private readonly secretToken: string;
@@ -58,6 +75,7 @@ export class MindneySDK {
    * @param {MindneyConfig} config - The configuration object containing clientId, apiKey, and secretToken.
    */
   constructor(config: MindneyConfig) {
+    this.endpoint = config.endpoint ?? "https://ai.mindney.com";
     this.clientId = config.clientId;
     this.apiKey = config.apiKey;
     this.secretToken = config.secretToken;
@@ -114,12 +132,12 @@ export class MindneySDK {
    */
   private async execute<T, K>(
     cmd: Commands,
-    prompt: HumanMessage<K>,
+    message: HumanMessage<K>,
   ): Promise<AIMessage<T> | AIErrorException> {
     return new Promise((resolve, reject) => {
       this.socket.emit(
         cmd,
-        prompt,
+        message,
         (response: AIMessage<T> | AIErrorException) => {
           if ("code" in response) {
             reject(response);
