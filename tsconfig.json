@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    // Basic Options
+    "target": "es2016", // Specify ECMAScript target version
+    "module": "commonjs", // Specify module code generation
+
+    // Module Resolution Options
+    "typeRoots": ["./node_modules/@types", "./types"], // List of folders to include type definitions from
+
+    // Emit Options
+    "outDir": "./dist", // Redirect output structure to the directory
+
+    // Type Checking Options
+    "skipLibCheck": true, // Skip type checking of declaration files
+
+    // Additional Checks
+    "removeComments": true // Do not emit comments to output
+  },
+  "include": [
+    "src/**/*.ts" // Files to be included in compilation
+  ]
+}
